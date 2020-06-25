@@ -9,5 +9,4 @@ class Player < Players
   def add_name(name)
     self.name = name
   end
-
 end

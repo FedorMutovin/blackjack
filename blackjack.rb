@@ -21,32 +21,18 @@ class BlackJack
     select_step
   end
 
-  def add_player_card
-    player.take_card
-    raise 'Вы проиграли' if player.score > 21
-
-    select_step
-
-  rescue RuntimeError => e
-    puts e.message
-    dealer.money += 10
-    player.money -= 10
-    show_restart_tip
-    continue_game(answer)
-  end
-
   def player_miss
     dealer.score >= 17 ? dealer_miss : add_dealer_card
   end
 
-  def continue_game(answer)
-    return unless answer == '1'
+  def add_player_card
+    player.take_card
+    raise "Вы проиграли, Ваши очки больше 21(#{player.score})" if player.score > 21
 
-    player.cards = []
-    dealer.cards = []
-    player.restart_cards
-    dealer.restart_cards
-    select_step
+    player_miss
+  rescue RuntimeError => e
+    puts e.message
+    dealer_win_tip
   end
 
   def dealer_miss
@@ -54,29 +40,20 @@ class BlackJack
   end
 
   def add_dealer_card
-    dealer.take_card
-    raise 'Дилер проиграли' if dealer.score > 21
+    dealer.take_card if dealer.cards.length < 3
+    raise "Дилер проиграл, очки Дилера больше 21(#{dealer.score})" if dealer.score > 21
 
     select_step
-
   rescue RuntimeError => e
     puts e.message
-    dealer.money -= 10
-    player.money += 10
-    show_restart_tip
-    continue_game(answer)
+    player_win_tip
   end
 
   def open_cards
-    if 21 - player.score > 21 - dealer.score
-      dealer.money += 10
-      player.money -= 10
-      raise 'Вы проиграли'
-    else
-      dealer.money -= 10
-      player.money += 10
-      raise 'Дилер проиграл'
-    end
+    show_cards
+    draw_result
+    dealer_win_result
+    player_win_result
   rescue RuntimeError => e
     puts e.message
     show_restart_tip
@@ -89,6 +66,26 @@ class BlackJack
 
   private
 
+  def continue_game(answer)
+    return unless answer == '1'
+
+    restart_player
+    restart_dealer
+    select_step
+  end
+
+  def restart_player
+    player.cards = []
+    player.restart_cards
+    raise 'У вас закончились монеты, вы проиграли' if player_lose?
+  end
+
+  def restart_dealer
+    dealer.cards = []
+    dealer.restart_cards
+    raise 'У дилера закончились монеты, вы выиграли' if dealer_lose?
+  end
+
   def select_step
     show_game_menu
     send PLAYER_STEPS[answer]
@@ -96,5 +93,41 @@ class BlackJack
 
   def user_answer
     self.answer = gets.chomp
+  end
+
+  def dealer_lose?
+    dealer.money.negative? || dealer.money.zero?
+  end
+
+  def player_lose?
+    player.money.negative? || player.money.zero?
+  end
+
+  def draw_result
+    return unless draw?
+
+    dealer.return_bet
+    player.return_bet
+    raise 'Ничья'
+  end
+
+  def dealer_win_result
+    return unless dealer_win?
+
+    dealer.add_bet
+    raise 'Вы проиграли'
+  end
+
+  def player_win_result
+    player.add_bet
+    raise 'Дилер проиграл'
+  end
+
+  def dealer_win?
+    21 - player.score > 21 - dealer.score
+  end
+
+  def draw?
+    21 - player.score == 21 - dealer.score
   end
 end

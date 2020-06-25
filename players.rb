@@ -22,6 +22,14 @@ class Players
     take_bet
   end
 
+  def add_bet
+    self.money += 20
+  end
+
+  def return_bet
+    self.money += 10
+  end
+
   private
 
   def take_bet
