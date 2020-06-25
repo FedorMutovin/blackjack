@@ -12,7 +12,7 @@ class Players
     take_bet
   end
 
-  def give_card
+  def take_card
     add_card
   end
 
