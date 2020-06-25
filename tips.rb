@@ -11,11 +11,13 @@ module Tips
           Игрок: Дилер
           Карты: ** **
           1.Пропустить, 2.Добавить карту, 3.Открыть карты"
+    return @answer = '3' if max_cards?
+
     user_answer
   end
 
   def show_restart_tip
-    puts 'Вы проиграли, хотите переиграть?
+    puts 'Хотите переиграть?
           1.Да
           2.Нет'
     user_answer
