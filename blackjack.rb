@@ -7,7 +7,7 @@ class BlackJack
   include Tips
   attr_accessor :answer, :player, :dealer
 
-  STEPS = { '1' => :miss, '2' => :give_card, '3' => :open_cards }.freeze
+  USER_STEPS = { '1' => :miss, '2' => :give_card, '3' => :open_cards }.freeze
 
   def initialize
     @player = Player.new
@@ -15,31 +15,43 @@ class BlackJack
   end
 
   def start
-    start_name_tip
+    show_start_name_tip
     player.name = answer
-    puts "Игрок: #{player.name}
-          Ваши карты: #{player.cards}, очки: #{player.score}
-          Деньги: #{player.money}
-          Игрок: Дилер
-          Карты: ** **
-          1.Пропустить, 2.Добавить карту, 3.Открыть карты"
-    user_answer
-    send STEPS[answer]
+    select_step
   end
 
   def give_card
     player.take_card
-    puts "Игрок: #{player.name}
-          Ваши карты: #{player.cards}, очки: #{player.score}
-          Деньги: #{player.money}
-          Игрок: Дилер
-          Карты: ** **
-          1.Пропустить, 2.Добавить карту, 3.Открыть карты"
-    user_answer
-    send STEPS[answer]
+    raise 'Вы проиграли' if player.score > 21
+
+    select_step
+
+  rescue RuntimeError
+    dealer.money += 10
+    player.money -= 10
+    show_restart_tip
+    continue_game(answer)
+  end
+
+  def miss
+  end
+
+  def continue_game(answer)
+    return unless answer == '1'
+
+    player.cards = []
+    dealer.cards = []
+    player.restart_cards
+    dealer.restart_cards
+    select_step
   end
 
   private
+
+  def select_step
+    show_game_menu
+    send USER_STEPS[answer]
+  end
 
   def user_answer
     self.answer = gets.chomp

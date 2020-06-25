@@ -16,6 +16,12 @@ class Players
     add_card
   end
 
+  def restart_cards
+    self.score = 0
+    give_start_cards
+    take_bet
+  end
+
   private
 
   def take_bet
