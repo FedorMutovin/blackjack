@@ -81,8 +81,12 @@ class BlackJackView
   end
 
   def show_all_cards
-    puts "Ваши карты: #{game.player.cards}, очки: #{game.player.score}"
-    puts "Карты Дилера: #{game.dealer.cards}, очки: #{game.dealer.score}"
+    puts 'Ваши карты:'
+    show_player_cards
+    puts "очки: #{game.player.score}"
+    puts 'Карты Дилера:'
+    show_dealer_cards
+    puts "очки: #{game.dealer.score}"
   end
 
   def show_continue_tip
@@ -91,18 +95,31 @@ class BlackJackView
 
   def show_player_table
     puts "Игрок: #{game.player.name}
-          Карты: #{game.player.cards}
-          Очки: #{game.player.score}
-          Деньги: #{game.player.money}"
+Очки: #{game.player.score}
+Деньги: #{game.player.money}
+Карты:"
+    show_player_cards
   end
 
   def show_dealer_table
     puts "Игрок: Дилер
-          Карты: ** ** #{'**' if game.dealer.cards.length == 3}
-          Деньги: #{game.dealer.money}"
+Карты: ** ** #{'**' if game.dealer.cards.length == 3}
+Деньги: #{game.dealer.money}"
   end
 
   def show_next_step
     puts "1.Пропустить ход#{', 2.Добавить карту,' if game.player.cards.length < 3} 3.Открыть карты"
+  end
+
+  def show_player_cards
+    game.player.cards.each do |card|
+      puts card.name
+    end
+  end
+
+  def show_dealer_cards
+    game.dealer.cards.each_with_object([]) do |card|
+      puts card.name
+    end
   end
 end
