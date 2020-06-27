@@ -118,7 +118,7 @@ class BlackJackView
   end
 
   def show_dealer_cards
-    game.dealer.cards.each_with_object([]) do |card|
+    game.dealer.cards.each do |card|
       puts card.name
     end
   end
