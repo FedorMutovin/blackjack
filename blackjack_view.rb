@@ -6,16 +6,16 @@ require_relative 'deck'
 require_relative 'blackjack_controller'
 
 class BlackJackView
-  attr_accessor :game
+  attr_accessor :game, :answer
 
   STEPS = { '1' => :miss_step, '2' => :add_card_step, '3' => :open_step }.freeze
 
-  def initialize(game)
-    @game = game
+  def initialize
+    add_player_name_tip
+    @game = BlackJackController.new(user_answer)
   end
 
   def start
-    add_player_name_tip
     game.start_game
     menu
   end
@@ -23,8 +23,8 @@ class BlackJackView
   def menu
     open_step if game.max_cards?
     show_menu_table
-    game.choose_step
-    send STEPS[game.answer]
+    user_answer
+    send STEPS[answer]
   end
 
   def miss_step
@@ -34,7 +34,8 @@ class BlackJackView
     puts e.message
     game.player.take_bet
     show_continue_tip
-    return unless game.continue?
+    user_answer
+    return unless game.continue?(answer)
 
     game.refresh_game
     menu
@@ -48,7 +49,8 @@ class BlackJackView
     puts e.message
     game.dealer.take_bet
     show_continue_tip
-    return unless game.continue?
+    user_answer
+    return unless game.continue?(answer)
 
     game.refresh_game
     menu
@@ -58,7 +60,8 @@ class BlackJackView
     show_all_cards
     game.open_cards
     show_continue_tip
-    return unless game.continue?
+    user_answer
+    return unless game.continue?(answer)
 
     game.refresh_game
     menu
@@ -121,5 +124,9 @@ class BlackJackView
     game.dealer.cards.each do |card|
       puts card.name
     end
+  end
+
+  def user_answer
+    self.answer = gets.chomp
   end
 end

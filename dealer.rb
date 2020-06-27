@@ -1,6 +1,6 @@
 require_relative 'players'
 class Dealer < Players
-  def initialize
+  def initialize(name)
     super
   end
 end

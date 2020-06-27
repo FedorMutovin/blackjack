@@ -1,10 +1,11 @@
 class Players
   attr_accessor :money, :cards, :score, :name
 
-  def initialize
+  def initialize(name)
     @money = 100
     @cards = []
     @score = 0
+    @name = name
   end
 
   def take_bet

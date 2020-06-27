@@ -6,25 +6,19 @@ require_relative 'deck'
 require_relative 'blackjack_view'
 
 class BlackJackController
-  attr_accessor :answer, :player, :dealer, :deck
+  attr_accessor :player, :dealer, :deck
 
   PLAYER_STEPS = { '1' => :player_miss, '2' => :player_take_card, '3' => :open_cards }.freeze
 
-  def initialize
-    @player = Player.new
-    @dealer = Dealer.new
+  def initialize(answer)
+    @player = Player.new(answer)
+    @dealer = Dealer.new('Дилер')
     @deck = Deck.new
   end
 
   def start_game
-    player.add_name(user_answer)
-    dealer.add_name('Дилер')
     add_start_cards(deck)
     take_start_bets
-  end
-
-  def choose_step
-    user_answer
   end
 
   def player_miss
@@ -53,8 +47,7 @@ class BlackJackController
     dealer.cards.length == 3 && player.cards.length == 3
   end
 
-  def continue?
-    user_answer
+  def continue?(answer)
     return true if answer == 'yes'
 
     raise 'Игра окончена' if answer == 'no'
@@ -118,10 +111,6 @@ class BlackJackController
   def return_start_bets
     player.return_bet
     dealer.return_bet
-  end
-
-  def user_answer
-    self.answer = gets.chomp
   end
 
   def make_choice(answer, *player)

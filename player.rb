@@ -1,6 +1,6 @@
 require_relative 'players'
 class Player < Players
-  def initialize
+  def initialize(name)
     super
   end
 end

@@ -1,5 +1,4 @@
 require_relative 'blackjack_controller'
 
-blackjack = BlackJackController.new
-game = BlackJackView.new(blackjack)
+game = BlackJackView.new
 game.start
