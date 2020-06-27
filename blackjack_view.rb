@@ -21,10 +21,18 @@ class BlackJackView
   end
 
   def menu
+    new_game if game.over?
     open_step if game.max_cards?
     show_menu_table
     user_answer
     send STEPS[answer]
+  rescue RuntimeError => e
+    puts e.message
+    user_answer
+    return unless game.continue?(answer)
+
+    game.new_game
+    menu
   end
 
   def miss_step
@@ -59,11 +67,24 @@ class BlackJackView
   def open_step
     show_all_cards
     game.open_cards
+
+  rescue RuntimeError => e
+    puts e.message
     show_continue_tip
     user_answer
     return unless game.continue?(answer)
 
     game.refresh_game
+    menu
+  end
+
+  def new_game
+    show_money_tip
+    show_continue_tip
+    user_answer
+    return unless game.continue?(answer)
+
+    game.new_game
     menu
   end
 
@@ -128,5 +149,10 @@ class BlackJackView
 
   def user_answer
     self.answer = gets.chomp
+  end
+
+  def show_money_tip
+    puts 'У вас закончились деньги' if game.player.money.zero? || game.player.money.negative?
+    puts 'У дилера закончились деньги' if game.dealer.money.zero? || game.dealer.money.negative?
   end
 end

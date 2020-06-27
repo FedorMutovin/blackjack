@@ -30,8 +30,6 @@ class BlackJackController
   def open_cards
     draw_result
     dealer_win? ? dealer_win_result : player_win_result
-  rescue RuntimeError => e
-    puts e.message
   end
 
   def give_card(player)
@@ -50,7 +48,7 @@ class BlackJackController
   def continue?(answer)
     return true if answer == 'yes'
 
-    raise 'Игра окончена' if answer == 'no'
+    false if answer == 'no'
   end
 
   def draw_result
@@ -58,6 +56,12 @@ class BlackJackController
 
     return_start_bets
     raise 'Ничья'
+  end
+
+  def new_game
+    refresh_game
+    player.money = 100
+    dealer.money = 100
   end
 
   def refresh_game
@@ -81,11 +85,7 @@ class BlackJackController
   end
 
   def dealer_win?
-    raise "Превышено кол-во очков, Дилер проиграл(#{dealer.score},#{dealer.cards})" if dealer.score > 21
-
     21 - dealer.score < 21 - player.score
-  rescue RuntimeError => e
-    puts e.message
   end
 
   def refresh_players
@@ -104,8 +104,6 @@ class BlackJackController
   def take_start_bets
     player.add_bet
     dealer.add_bet
-    raise 'У вас закончились деньги' if player.money.zero? || player.money.negative?
-    raise 'У дилера закончились деньги' if dealer.money.zero? || dealer.money.negative?
   end
 
   def return_start_bets
@@ -116,5 +114,9 @@ class BlackJackController
   def make_choice(answer, *player)
     send PLAYER_STEPS[answer], player if answer == '2'
     send PLAYER_STEPS[answer]
+  end
+
+  def over?
+    player.money.zero? || player.money.negative? || dealer.money.zero? || dealer.money.negative?
   end
 end
