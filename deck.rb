@@ -12,7 +12,9 @@ class Deck
   end
 
   def add_card
-    @cards.sample
+    card = @cards.sample
+    @cards.delete(card)
+    card
   end
 
   private
