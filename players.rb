@@ -4,7 +4,7 @@ class Players
   def initialize
     @money = 100
     @cards = []
-    @score = []
+    @score = 0
   end
 
   def take_bet
