@@ -4,29 +4,23 @@ require_relative 'dealer'
 require_relative 'card'
 require_relative 'deck'
 require_relative 'blackjack_view'
-require_relative 'blackjack_model'
 
-class BlackJackController < BlackJackModel
-  attr_accessor :answer, :player, :dealer, :deck, :player_cards, :dealer_cards,
-                :player_score, :dealer_score
+class BlackJackController
+  attr_accessor :answer, :player, :dealer, :deck
 
-  PLAYER_STEPS = { '1' => :player_miss, '2' => :add_player_card, '3' => :open_cards }.freeze
+  PLAYER_STEPS = { '1' => :player_miss, '2' => :player_take_card, '3' => :open_cards }.freeze
 
   def initialize
     @player = Player.new
     @dealer = Dealer.new
     @deck = Deck.new
-    @player_cards = []
-    @dealer_cards = []
-    @player_score = 0
-    @dealer_score = 0
   end
 
   def start_game
-    player.name = user_answer
-    add_start_cards
+    player.add_name(user_answer)
+    dealer.add_name('Дилер')
+    add_start_cards(deck)
     take_start_bets
-    calculate_score
   end
 
   def choose_step
@@ -34,25 +28,9 @@ class BlackJackController < BlackJackModel
   end
 
   def player_miss
-    return if dealer_score > 17 || dealer_cards.length == 3
+    return if dealer.score > 17 || dealer.cards.length == 3
 
-    add_dealer_card
-  end
-
-  def add_dealer_card
-    dealer_cards << deck.add_card
-
-    calculate_score
-  rescue RuntimeError => e
-    puts e.message
-  end
-
-  def add_player_card
-    player_cards << deck.add_card
-    calculate_score
-    raise "Превышено кол-во очков, Вы проиграли(#{player_score}, #{player_cards_names})" if player_score > 21
-
-    player_miss
+    give_card(dealer)
   end
 
   def open_cards
@@ -60,5 +38,94 @@ class BlackJackController < BlackJackModel
     dealer_win? ? dealer_win_result : player_win_result
   rescue RuntimeError => e
     puts e.message
+  end
+
+  def give_card(player)
+    player.take_card(deck)
+    if player.score > 21
+      raise "Превышено кол-во очков, Игрок: #{player.name} проиграл(#{player.score}, #{player.cards})"
+    end
+
+    player_miss
+  end
+
+  def max_cards?
+    dealer.cards.length == 3 && player.cards.length == 3
+  end
+
+  def continue?
+    user_answer
+    return true if answer == 'yes'
+
+    raise 'Игра окончена' if answer == 'no'
+  end
+
+  def draw_result
+    return unless draw?
+
+    return_start_bets
+    raise 'Ничья'
+  end
+
+  def refresh_game
+    refresh_players
+    add_start_cards(deck)
+    take_start_bets
+  end
+
+  def draw?
+    dealer.score == player.score
+  end
+
+  def player_win_result
+    player.take_bet
+    raise 'Вы выиграли'
+  end
+
+  def dealer_win_result
+    dealer.take_bet
+    raise 'Дилер выиграл'
+  end
+
+  def dealer_win?
+    raise "Превышено кол-во очков, Дилер проиграл(#{dealer.score},#{dealer.cards})" if dealer.score > 21
+
+    21 - dealer.score < 21 - player.score
+  rescue RuntimeError => e
+    puts e.message
+  end
+
+  def refresh_players
+    @player.cards = []
+    @dealer.cards = []
+    @player.score = 0
+    @dealer.score = 0
+    @deck = Deck.new
+  end
+
+  def add_start_cards(deck)
+    player.take_start_cards(deck)
+    dealer.take_start_cards(deck)
+  end
+
+  def take_start_bets
+    player.add_bet
+    dealer.add_bet
+    raise 'У вас закончились деньги' if player.money.zero? || player.money.negative?
+    raise 'У дилера закончились деньги' if dealer.money.zero? || dealer.money.negative?
+  end
+
+  def return_start_bets
+    player.return_bet
+    dealer.return_bet
+  end
+
+  def user_answer
+    self.answer = gets.chomp
+  end
+
+  def make_choice(answer, *player)
+    send PLAYER_STEPS[answer], player if answer == '2'
+    send PLAYER_STEPS[answer]
   end
 end

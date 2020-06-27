@@ -4,7 +4,6 @@ require_relative 'dealer'
 require_relative 'card'
 require_relative 'deck'
 require_relative 'blackjack_controller'
-require_relative 'blackjack_model'
 
 class BlackJackView
   attr_accessor :game
@@ -42,7 +41,7 @@ class BlackJackView
   end
 
   def add_card_step
-    game.add_player_card
+    game.give_card(game.player)
     show_player_card
     menu
   rescue RuntimeError => e
@@ -78,12 +77,12 @@ class BlackJackView
   end
 
   def show_player_card
-    puts "Добавлена карта: #{game.player_cards[2].name}"
+    puts "Добавлена карта: #{game.player.cards[2].name}"
   end
 
   def show_all_cards
-    puts "Ваши карты: #{game.player_cards_names}, очки: #{game.player_score}"
-    puts "Карты Дилера: #{game.dealer_cards_names}, очки: #{game.dealer_score}"
+    puts "Ваши карты: #{game.player.cards}, очки: #{game.player.score}"
+    puts "Карты Дилера: #{game.dealer.cards}, очки: #{game.dealer.score}"
   end
 
   def show_continue_tip
@@ -92,18 +91,18 @@ class BlackJackView
 
   def show_player_table
     puts "Игрок: #{game.player.name}
-          Карты: #{game.player_cards_names}
-          Очки: #{game.player_score}
+          Карты: #{game.player.cards}
+          Очки: #{game.player.score}
           Деньги: #{game.player.money}"
   end
 
   def show_dealer_table
     puts "Игрок: Дилер
-          Карты: ** ** #{'**' if game.dealer_cards.length == 3}
+          Карты: ** ** #{'**' if game.dealer.cards.length == 3}
           Деньги: #{game.dealer.money}"
   end
 
   def show_next_step
-    puts "1.Пропустить ход#{', 2.Добавить карту,' if game.player_cards.length < 3} 3.Открыть карты"
+    puts "1.Пропустить ход#{', 2.Добавить карту,' if game.player.cards.length < 3} 3.Открыть карты"
   end
 end

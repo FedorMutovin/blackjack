@@ -1,8 +1,10 @@
 class Players
-  attr_accessor :money
+  attr_accessor :money, :cards, :score, :name
 
   def initialize
     @money = 100
+    @cards = []
+    @score = []
   end
 
   def take_bet
@@ -17,17 +19,49 @@ class Players
     self.money -= 10
   end
 
-  private
-
-  def add_ace
-    @ace ||= 0
-    @ace += 1
+  def take_card(deck)
+    cards << deck.add_card
+    calculate_score
+    deck.cards.delete(cards)
   end
 
-  def calculate_ace
-    return if @ace.nil? || @ace.zero?
+  def take_start_cards(deck)
+    2.times { take_card(deck) }
+  end
 
-    (score + 11) <= 21 ? add_score(11) : add_score(1)
-    @ace = 0
+  def calculate_score
+    self.score = 0
+    cards.each do |card|
+      if card.name.include?('A')
+        add_ace_score(card)
+      else
+        self.score += card.score
+      end
+    end
+    score_with_ace
+  end
+
+  def add_name(name)
+    self.name = name
+  end
+
+  private
+
+  def score_with_ace
+    return if @ace_score.nil?
+
+    @ace_score.each do |score|
+      self.score += if self.score + score[1] <= 21
+                      score[1]
+                    else
+                      score[0]
+                    end
+    end
+    @ace_score = []
+  end
+
+  def add_ace_score(card)
+    @ace_score ||= []
+    @ace_score << card.score
   end
 end

@@ -11,10 +11,6 @@ class Deck
     generate
   end
 
-  def give_start_cards(players)
-    2.times { players << add_card }
-  end
-
   def add_card
     @cards[rand(@cards.length)]
   end
