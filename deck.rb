@@ -12,7 +12,7 @@ class Deck
   end
 
   def add_card
-    @cards[rand(@cards.length)]
+    @cards.sample
   end
 
   private
