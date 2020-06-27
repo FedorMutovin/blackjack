@@ -1,6 +1,4 @@
-require_relative 'deck'
-
-class Card < Deck
+class Card
   attr_accessor :name, :score
 
   def initialize(name, score)
